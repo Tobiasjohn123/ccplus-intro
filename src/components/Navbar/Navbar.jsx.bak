@@ -1,0 +1,41 @@
+import { Home, BookOpen, Phone, MessageCircle } from 'lucide-react'
+import { CONTACT } from '../../data/config'
+import './Navbar.css'
+
+const WA = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent('Hello, I would like to register for the next cohort.')}`
+const COURSES_URL = 'https://www.computercollegeplus.com/courses'
+
+export function BrandLogo({ text = false }) {
+  return (
+    <span className="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <circle cx="14" cy="14" r="14" fill="#3d3bff" />
+        <path d="M18.5 10.2A5.6 5.6 0 1 0 18.5 17.8" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" />
+      </svg>
+      {text && <b>Computer College Plus</b>}
+    </span>
+  )
+}
+
+export default function Navbar() {
+  return (
+    <>
+      <nav className="nav glass" aria-label="Main">
+        <a className="nav__brand" href="#top"><BrandLogo text /></a>
+        <div className="nav__links">
+          <a className="on" href="#top">Home</a>
+          <a href={COURSES_URL} target="_blank" rel="noreferrer">Courses</a>
+          <a href={`tel:${CONTACT.phone}`}>Call us</a>
+        </div>
+        <a className="btn btn--dark nav__reg" href={WA} target="_blank" rel="noreferrer">Register</a>
+      </nav>
+
+      <nav className="bnav glass" aria-label="Quick">
+        <a className="on" href="#top"><Home size={22} /><span>Home</span></a>
+        <a href={COURSES_URL} target="_blank" rel="noreferrer"><BookOpen size={22} /><span>Courses</span></a>
+        <a href={`tel:${CONTACT.phone}`}><Phone size={22} /><span>Call</span></a>
+        <a className="reg" href={WA} target="_blank" rel="noreferrer"><MessageCircle size={22} /><span>Register</span></a>
+      </nav>
+    </>
+  )
+}
