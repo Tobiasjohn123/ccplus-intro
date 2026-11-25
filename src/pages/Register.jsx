@@ -36,7 +36,7 @@ export default function Register() {
   const set = (k) => (e) => { setF((p) => ({ ...p, [k]: e.target.value })); clear(k) }
   const course = courseBySlug(slug)
   const isTest = params.get("test") === "true"; const activeCourses = isTest ? [TEST_COURSE, ...COURSES] : COURSES; const options = activeCourses.filter((c) => c.prices[age])
-  const fee = course ? course.prices[age] : null
+  const fee = course ? (course.prices[age] || course.prices.adult || 100) : null
   const minor = age !== 'adult'
   const slotObj = SCHEDULE.slots.find((s) => s.id === slot)
   const ageLabel = AGE_GROUPS.find((g) => g.key === age).label
