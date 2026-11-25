@@ -7,19 +7,13 @@ import { CONTACT } from '../data/config'
 import { COURSES, AGE_GROUPS, naira, courseBySlug } from '../data/courses'
 import { SCHEDULE, SCHEDULE_GROUPS, PAYMENT, SHEET_URL } from '../data/site'
 
-const TEST_COURSE = {
-  slug: 'payment-test',
-  name: 'Payment Test (₦100)',
-  weeks: '1 Week',
-  prices: { adult: 100, teen: 100, child: 100 },
-  intro: 'Temporary course for testing payments.',
-  learn: [],
-  who: [],
-  careers: [],
-};
 const EMPTY = { fullName: '', email: '', phone: '', address: '', guardianName: '', guardianPhone: '', dob: '', notes: '', website: '' }
 const PHONE = /^\+?[0-9][0-9\s-]{8,16}$/
 const MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const newId = () => (window.crypto && window.crypto.randomUUID)
+  ? window.crypto.randomUUID()
+  : 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10)
 
 export default function Register() {
   const [params] = useSearchParams()
@@ -40,7 +34,7 @@ export default function Register() {
   const clear = (k) => setErrors((p) => (p[k] ? { ...p, [k]: undefined } : p))
   const set = (k) => (e) => { setF((p) => ({ ...p, [k]: e.target.value })); clear(k) }
   const course = courseBySlug(slug)
-  const options = (course && course.slug === 'payment-test' ? [...COURSES, course] : COURSES).filter((c) => c.prices[age])
+  const options = COURSES.filter((c) => c.prices[age])
   const fee = course ? course.prices[age] : null
   const minor = age !== 'adult'
   const slotObj = SCHEDULE.slots.find((s) => s.id === slot)
@@ -83,6 +77,7 @@ export default function Register() {
     setBusy(true)
     setErr('')
     const data = {
+      regId: newId(),
       ageGroup: age, course: course.name, fee, classTime: `${slotObj.days}, ${slotObj.label} (${slotObj.time})`,
       fullName: f.fullName.trim(), email: f.email.trim(), phone: f.phone.trim(), address: f.address.trim(),
       guardianName: f.guardianName.trim(), guardianPhone: f.guardianPhone.trim(), dob: f.dob, notes: f.notes.trim(), website: f.website,
@@ -102,23 +97,22 @@ export default function Register() {
     }
   }
 
-    const handlePaid = async (paymentData) => {
-    if (!SHEET_URL) return;
+  // Closing the payment popup marks the row Cancelled (the Sheet script never overwrites Paid).
+  const handleCancel = async () => {
+    if (!SHEET_URL || !done) return
     try {
       await fetch(SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          ...done,
-          status: `Paid via Paystack (Ref: ${paymentData?.reference || 'Success'})`
-        })
-      });
+        body: new URLSearchParams({ action: 'cancel', regId: done.regId }),
+      })
     } catch (e) {
-      console.error('Failed to send paid status to Sheet', e);
+      console.error('Could not send cancelled status to the Sheet', e)
     }
-  };
-const copy = (n) => {
+  }
+
+  const copy = (n) => {
     if (navigator.clipboard) navigator.clipboard.writeText(n)
     setCopied(n)
     setTimeout(() => setCopied(''), 1800)
@@ -135,7 +129,7 @@ const copy = (n) => {
   if (done) {
     const msg = `Hello, this is my proof of payment.\nName: ${done.fullName}\nCourse: ${done.course} (${done.ageLabel})\nAmount: ${naira(done.fee)}\nPhone: ${done.phone}`
     const wa = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(msg)}`
-    
+
     return (
       <PageShell kicker="Registration received" title={<>Thank you, <mark>{done.fullName.split(' ')[0]}</mark></>} sub="Your details have been received. Complete your payment below so we can confirm your place.">
         <div className="rg-done">
@@ -152,15 +146,16 @@ const copy = (n) => {
                 </div>
               ))}
             </div>
-            
+
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
-              <PayOnline 
-                onPaid={handlePaid}
-                slug={course.slug} 
-                ageGroup={age} 
-                email={done.email} 
-                name={done.fullName} 
-                phone={done.phone} 
+              <PayOnline
+                onCancel={handleCancel}
+                regId={done.regId}
+                slug={course.slug}
+                ageGroup={age}
+                email={done.email}
+                name={done.fullName}
+                phone={done.phone}
               />
             </div>
           </section>

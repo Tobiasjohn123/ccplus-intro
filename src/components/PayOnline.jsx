@@ -9,7 +9,7 @@ const loadPaystack = () => new Promise((resolve, reject) => {
   document.body.appendChild(s)
 })
 
-export default function PayOnline({ slug, ageGroup, email, name, phone, onPaid }) {
+export default function PayOnline({ slug, ageGroup, email, name, phone, regId, onPaid, onCancel }) {
   const [state, setState] = useState('idle')
   const [msg, setMsg] = useState('')
 
@@ -32,14 +32,14 @@ export default function PayOnline({ slug, ageGroup, email, name, phone, onPaid }
       const r = await fetch('/api/paystack-init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course: slug, ageGroup, email, name, phone }),
+        body: JSON.stringify({ course: slug, ageGroup, email, name, phone, regId }),
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok || !j.access_code) throw new Error(j.error || 'init')
       const PaystackPop = await loadPaystack()
       new PaystackPop().resumeTransaction(j.access_code, {
         onSuccess: (tx) => verify((tx && tx.reference) || j.reference),
-        onCancel: () => setState('idle'),
+        onCancel: () => { setState('idle'); if (onCancel) onCancel() },
       })
       setState('idle')
     } catch (e) {

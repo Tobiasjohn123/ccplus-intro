@@ -1,4 +1,5 @@
 import { SECRET, priceFor, paystack } from './_lib.js'
+import { markPaid } from './_sheet.js'
 
 export default async function handler(req, res) {
   const reference = String((req.query && req.query.reference) || '')
@@ -14,5 +15,8 @@ export default async function handler(req, res) {
   const paid = t.amount / 100
   if (!hit || paid !== hit.naira) return res.status(200).json({ ok: false })
 
-  return res.status(200).json({ ok: true, amount: paid, course: hit.course.name, reference })
+  // Payment is confirmed by Paystack: now mark the Sheet row as Paid.
+  const sheet = await markPaid(m.regId, reference)
+
+  return res.status(200).json({ ok: true, amount: paid, course: hit.course.name, reference, sheet })
 }
