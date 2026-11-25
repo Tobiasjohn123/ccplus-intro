@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Courses from './pages/Courses'
 import CourseDetail from './pages/CourseDetail'
 import Register from './pages/Register'
+import PayTest from './components/PayTest.jsx'
 import About from './pages/About'
 import Reviews from './pages/Reviews'
 import Chat from './pages/Chat'
@@ -51,7 +52,7 @@ function Shell() {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
-          <Route path="/test-payment" element={<TestPayment />} />
+          <Route path="/test-payment" element={<PayTest />} />
         <Route path="/register" element={<Register />} />
           <Route path="/about" element={<About />} />
           <Route path="/reviews" element={<Reviews />} />
