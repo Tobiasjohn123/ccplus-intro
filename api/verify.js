@@ -11,7 +11,6 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (data.data && data.data.status === 'success') {
-      // Optional: Trigger your Google Apps Script here to save the row
       return res.status(200).json({ status: 'success', message: 'Payment verified' });
     } else {
       return res.status(400).json({ status: 'failed', message: 'Payment not successful' });
