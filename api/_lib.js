@@ -10,6 +10,7 @@ const TEST_PRICES = {
 
 // The price always comes from the server, never from the browser.
 export function priceFor(slug, ageGroup) {
+  if (slug === 'payment-test') return { course: { slug: 'payment-test', name: 'Payment Test (₦100)' }, naira: 100 };
   if (process.env.PAYSTACK_ALLOW_TEST_PRICES === '1' && TEST_PRICES[slug]) {
     const t = TEST_PRICES[slug]
     return { course: { slug: t.slug, name: t.name }, naira: t.naira }
