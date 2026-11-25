@@ -34,8 +34,8 @@ export default function Register() {
 
   const clear = (k) => setErrors((p) => (p[k] ? { ...p, [k]: undefined } : p))
   const set = (k) => (e) => { setF((p) => ({ ...p, [k]: e.target.value })); clear(k) }
-  const course = courseBySlug(slug)
-  const isTest = params.get("test") === "true"; const activeCourses = isTest ? [TEST_COURSE, ...COURSES] : COURSES; const options = activeCourses.filter((c) => c.prices[age])
+  const isTest = params.get("test") === "true"; const activeCourses = isTest ? [TEST_COURSE, ...COURSES] : COURSES; const course = activeCourses.find(c => c.slug === slug)
+  const options = activeCourses.filter((c) => c.prices[age])
   const fee = course ? (course.prices[age] || course.prices.adult || 100) : null
   const minor = age !== 'adult'
   const slotObj = SCHEDULE.slots.find((s) => s.id === slot)
