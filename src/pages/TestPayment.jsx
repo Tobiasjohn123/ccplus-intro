@@ -9,10 +9,9 @@ export default function TestPayment() {
   const [phone, setPhone] = useState('')
   const [msg, setMsg] = useState('')
 
-  const handlePaid = async (paymentData) => {
+  const handlePaid = (data) => {
     setDone(true)
-    setMsg(`Paid via Paystack (Ref: ${paymentData?.reference || 'Success'})`)
-    // Optional: send to sheet here if needed, but PayOnline handles it if onPaid is passed
+    setMsg(`Paid via Paystack (Ref: ${data.reference || 'Success'})`)
   }
 
   if (done) {
@@ -28,7 +27,7 @@ export default function TestPayment() {
   return (
     <div style={{ padding: 40, maxWidth: 400, margin: '0 auto', fontFamily: 'sans-serif' }}>
       <h1>₦100 Test Payment</h1>
-      <p>This is a standalone page to test the Paystack integration.</p>
+      <p>This uses the exact same secure backend as the main form.</p>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
         <input placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required style={{ padding: 10 }} />
