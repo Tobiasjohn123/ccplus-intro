@@ -7,6 +7,7 @@ import { CONTACT } from '../data/config'
 import { COURSES, AGE_GROUPS, naira, courseBySlug } from '../data/courses'
 import { SCHEDULE, SCHEDULE_GROUPS, PAYMENT, SHEET_URL } from '../data/site'
 
+const TEST_COURSE = { slug: 'payment-test', name: 'Payment Test (₦100)', weeks: '1 Week', prices: { adult: 100, teen: 100, child: 100 }, intro: 'Temporary', learn: [], who: [], careers: [], promo: false };
 const EMPTY = { fullName: '', email: '', phone: '', address: '', guardianName: '', guardianPhone: '', dob: '', notes: '', website: '' }
 const PHONE = /^\+?[0-9][0-9\s-]{8,16}$/
 const MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -34,7 +35,7 @@ export default function Register() {
   const clear = (k) => setErrors((p) => (p[k] ? { ...p, [k]: undefined } : p))
   const set = (k) => (e) => { setF((p) => ({ ...p, [k]: e.target.value })); clear(k) }
   const course = courseBySlug(slug)
-  const options = COURSES.filter((c) => c.prices[age])
+  const isTest = params.get("test") === "true"; const activeCourses = isTest ? [TEST_COURSE, ...COURSES] : COURSES; const options = activeCourses.filter((c) => c.prices[age])
   const fee = course ? course.prices[age] : null
   const minor = age !== 'adult'
   const slotObj = SCHEDULE.slots.find((s) => s.id === slot)
