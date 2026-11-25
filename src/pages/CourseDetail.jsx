@@ -1,0 +1,148 @@
+import { useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, ArrowDown, Award, Briefcase, Video, Laptop, Clock, CalendarDays, Wallet, Check } from 'lucide-react'
+import Navbar, { BrandLogo } from '../components/Navbar/Navbar'
+import { courseBySlug, ageGroupsOf, naira, tagText } from '../data/courses'
+import { withExtras } from '../data/courseExtras'
+import { SCHEDULE, SCHEDULE_GROUPS, slotText } from '../data/site'
+import { CONTACT } from '../data/config'
+import '../components/Pages/Pages.css'
+
+function Top() {
+  return (
+    <div className="pg__nav">
+      <Link to="/" className="pg__logo" aria-label="Home"><BrandLogo /></Link>
+      <Navbar />
+    </div>
+  )
+}
+
+export default function CourseDetail() {
+  const { slug } = useParams()
+  const base = courseBySlug(slug)
+  const [age, setAge] = useState(null)
+
+  if (!base) {
+    return (
+      <div className="pg">
+        <Top />
+        <div className="cd">
+          <Link to="/courses" className="cd__back"><ArrowLeft size={18} /> All courses</Link>
+          <h1 className="cd__title">Course not found</h1>
+        </div>
+      </div>
+    )
+  }
+
+  const course = withExtras(base)
+  const groups = ageGroupsOf(course)
+  const active = age && course.prices[age] ? age : (course.prices.adult ? 'adult' : groups[0].key)
+  const wa = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent('Hello, I would like to know more about ' + course.name + '.')}`
+  const gets = [
+    [Award, course.cert || 'Professional certificate'],
+    [Briefcase, 'Internship opportunities'],
+    [Video, 'Catch-up class recordings'],
+    [Laptop, 'Online & interactive classes'],
+  ]
+
+  return (
+    <div className="pg">
+      <Top />
+      <div className="cd">
+        <Link to="/courses" className="cd__back"><ArrowLeft size={18} /> All courses</Link>
+        <header className="cd__head">
+          <h1 className="cd__title">{course.name}</h1>
+          <p className="cd__tag">{tagText(course)}</p>
+          <a className="cd__jump" href="#cd-pay">Prices &amp; registration <ArrowDown size={16} /></a>
+        </header>
+
+        <div className="cd__grid">
+          <div className="cd__main">
+            <section className="cd-sec">
+              <h2>Overview</h2>
+              <p className="cd-intro">{course.intro}</p>
+            </section>
+
+            {course.learn.length > 0 && (
+              <section className="cd-sec">
+                <h2>What you will learn</h2>
+                <div className="cd-learn">
+                  {course.learn.map(([t, d]) => (
+                    <div key={t}><b>{t}</b><p>{d}</p></div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {course.who.length > 0 && (
+              <section className="cd-sec">
+                <h2>Who should take this course</h2>
+                <ul className="cd-list">
+                  {course.who.map((w) => <li key={w}><Check size={18} />{w}</li>)}
+                </ul>
+              </section>
+            )}
+
+            {course.why && (
+              <section className="cd-sec">
+                <h2>Why learn this</h2>
+                <p className="cd-intro">{course.why}</p>
+              </section>
+            )}
+
+            {course.careers.length > 0 && (
+              <section className="cd-sec">
+                <h2>Career opportunities</h2>
+                <div className="cd-chips">{course.careers.map((c) => <span key={c}>{c}</span>)}</div>
+              </section>
+            )}
+
+            <section className="cd-sec">
+              <h2>What you get</h2>
+              <div className="cd-gets">
+                {gets.map(([Icon, t]) => <div key={t}><i><Icon size={20} /></i>{t}</div>)}
+              </div>
+            </section>
+
+            <p className="cd-help">Questions about this course? <a href={wa} target="_blank" rel="noreferrer">Ask us on WhatsApp</a>.</p>
+          </div>
+
+          <aside className="cd__side" id="cd-pay">
+            <div className="cd-card">
+              {groups.length > 1 ? (
+                <div className="cd-tabs" role="group" aria-label="Price by age group">
+                  {groups.map((g) => (
+                    <button key={g.key} type="button" aria-pressed={active === g.key} onClick={() => setAge(g.key)}>{g.label}</button>
+                  ))}
+                </div>
+              ) : (
+                <span className="cd-only">{groups[0].label}</span>
+              )}
+
+              <div className="cd-price">
+                <small>Training fee</small>
+                <strong>{naira(course.prices[active])}</strong>
+                {course.promo && active === 'adult' && <span className="cd-badge">Promo price</span>}
+              </div>
+
+              <ul className="cd-facts">
+                <li><Clock size={18} /><span><b>Duration</b>{course.weeks}</span></li>
+                <li>
+                  <CalendarDays size={18} />
+                  <span>
+                    <b>Classes &middot; {SCHEDULE.mode}</b>
+                    {SCHEDULE_GROUPS.map((g) => <em key={g.days}>{g.days}: {g.slots.map(slotText).join(' or ')}</em>)}
+                  </span>
+                </li>
+                <li><Wallet size={18} /><span><b>Payment</b>Bank transfer details are shown right after you register.</span></li>
+              </ul>
+              {course.note && <p className="cd-note">{course.note}</p>}
+
+              <Link className="pg-btn pg-btn--blue cd-btn" to={`/register?course=${course.slug}&age=${active}`}>Register for this course <ArrowRight size={16} /></Link>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  )
+}

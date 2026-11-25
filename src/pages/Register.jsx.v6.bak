@@ -1,0 +1,201 @@
+import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import PageShell from '../components/Pages/PageShell'
+import { CONTACT } from '../data/config'
+import { COURSES, AGE_GROUPS, naira, courseBySlug } from '../data/courses'
+import { SCHEDULE, PAYMENT, SHEET_URL } from '../data/site'
+
+const EMPTY = { fullName: '', email: '', phone: '', address: '', guardianName: '', guardianPhone: '', dob: '', notes: '', website: '' }
+
+export default function Register() {
+  const [params] = useSearchParams()
+  const startAge = AGE_GROUPS.some((g) => g.key === params.get('age')) ? params.get('age') : 'adult'
+  const [age, setAge] = useState(startAge)
+  const [slug, setSlug] = useState(() => {
+    const c = courseBySlug(params.get('course'))
+    return c && c.prices[startAge] ? c.slug : ''
+  })
+  const [slot, setSlot] = useState('')
+  const [f, setF] = useState(EMPTY)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [done, setDone] = useState(null)
+  const [copied, setCopied] = useState('')
+
+  const set = (k) => (e) => setF((p) => ({ ...p, [k]: e.target.value }))
+  const course = courseBySlug(slug)
+  const options = COURSES.filter((c) => c.prices[age])
+  const fee = course ? course.prices[age] : null
+  const minor = age !== 'adult'
+  const slotObj = SCHEDULE.slots.find((s) => s.id === slot)
+  const ageLabel = AGE_GROUPS.find((g) => g.key === age).label
+
+  const chooseAge = (k) => {
+    setAge(k)
+    if (course && !course.prices[k]) setSlug('')
+  }
+
+  const submit = async (e) => {
+    e.preventDefault()
+    if (!course || !slotObj) return
+    setBusy(true)
+    setErr('')
+    const data = {
+      ageGroup: age, course: course.name, fee, classTime: `${slotObj.label} (${slotObj.time})`,
+      fullName: f.fullName.trim(), email: f.email.trim(), phone: f.phone.trim(), address: f.address.trim(),
+      guardianName: f.guardianName.trim(), guardianPhone: f.guardianPhone.trim(), dob: f.dob, notes: f.notes.trim(), website: f.website,
+    }
+    try {
+      if (SHEET_URL) {
+        const res = await fetch(SHEET_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            group: age,
+            headers: ['Full Name', 'Email', 'Phone', 'Course', 'Fee', 'Class Time', 'Address', 'Guardian Name', 'Guardian Phone', 'DOB', 'Notes', 'Date'],
+            row: [data.fullName, data.email, data.phone, data.course, data.fee, data.classTime, data.address, data.guardianName, data.guardianPhone, data.dob, data.notes, new Date().toISOString()]
+          })
+        })
+        const json = await res.json()
+        if (!json.ok) throw new Error(json.error)
+      } else {
+        console.warn('SHEET_URL is empty: this registration was NOT saved to the Google Sheet.')
+      }
+              
+        // --- GOOGLE SHEET CONNECTION ---
+        try {
+          await fetch('https://script.google.com/macros/s/AKfycbz2J8VRZC25zOhKHLPscG-dPBeTdZo5MmwfRFgGqdLlklb1bu2k0hqmavoU0x9B9o1TFg/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              row: [
+                f.fullName, f.email, f.phone, course?.name || '', age, f.address, f.guardianName, f.guardianPhone, f.dob, f.notes
+              ]
+            })
+          })
+        } catch (err) {
+          console.error('Google Sheet Error:', err)
+          setErr('Registration failed to save. Please try again.')
+          setBusy(false)
+          return
+        }
+        // -------------------------------if (typeof SHEET_URL !== 'undefined' && SHEET_URL) { await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ row: [f.fullName, f.email, f.phone, course?.name, age, f.address, f.guardianName, f.guardianPhone, f.dob, f.notes] }) }).catch(console.error); }
+        setDone({ ...data, ageLabel })
+      if (typeof SHEET_URL !== 'undefined' && SHEET_URL) { await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ row: [f.fullName, f.email, f.phone, course?.name, age, f.address, f.guardianName, f.guardianPhone, f.dob, f.notes] }) }).catch(console.error); }
+        window.scrollTo(0, 0)
+    } catch (x) {
+      setErr('We could not send your registration. Check your connection and try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const copy = (n) => {
+    if (navigator.clipboard) navigator.clipboard.writeText(n)
+    setCopied(n)
+    setTimeout(() => setCopied(''), 1800)
+  }
+
+  if (done) {
+    const msg = `Hello, this is my proof of payment.\nName: ${done.fullName}\nCourse: ${done.course} (${done.ageLabel})\nAmount: ${naira(done.fee)}\nPhone:${done.phone}`
+    const wa = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(msg)}`
+    return (
+      <PageShell kicker="Registration received" title={<>Thank you, <mark>{done.fullName.split(' ')[0]}</mark></>} sub="Your details have been received. Complete your payment below so we can confirm your place.">
+        <div className="rg-done">
+          <section className="rg-step">
+            <h2 className="rg-step__t"><span>1</span>Pay by bank transfer</h2>
+            <div className="rg-amount"><small>Amount to pay</small><strong>{naira(done.fee)}</strong><em>{done.course} &middot; {done.classTime}</em></div>
+            <div className="rg-accs">
+              {PAYMENT.accounts.map((a) => (
+                <div className="rg-acc" key={a.number}>
+                  <small>{a.bank}</small>
+                  <b>{a.number}</b>
+                  <span>{a.name}</span>
+                  <button type="button" className="rg-copy" onClick={() => copy(a.number)}>{copied === a.number ? 'Copied' : 'Copy number'}</button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rg-step">
+            <h2 className="rg-step__t"><span>2</span>Send your proof of payment</h2>
+            <p className="rg-p">After paying, send your proof of payment on WhatsApp and we will confirm your registration.</p>
+            <a className="pg-btn pg-btn--blue" href={wa} target="_blank" rel="noreferrer">Send on WhatsApp <ArrowRight size={16} /></a>
+          </section>
+
+          {!SHEET_URL && <p className="rg-warn">Setup reminder: the Google Sheet is not connected yet, so this registration was not saved. Add the web app link to SHEET_URL in src/data/site.js.</p>}
+        </div>
+      </PageShell>
+    )
+  }
+
+  return (
+    <PageShell kicker="Register" title={<>Join the <mark>next cohort</mark></>} sub="Three quick steps. It takes about two minutes.">
+      <form className="rg" onSubmit={submit}>
+        <div className="rg-form">
+          <section className="rg-step">
+            <h2 className="rg-step__t"><span>1</span>Who is registering?</h2>
+            <div className="cd-tabs" role="group" aria-label="Age group">
+              {AGE_GROUPS.map((g) => (
+                <button key={g.key} type="button" aria-pressed={age === g.key} onClick={() => chooseAge(g.key)}>{g.label}</button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rg-step">
+            <h2 className="rg-step__t"><span>2</span>Choose your course and class time</h2>
+            <label className="rg-f">Course
+              <select required value={slug} onChange={(e) => setSlug(e.target.value)}>
+                <option value="" disabled>Choose a course</option>
+                {options.map((c) => <option key={c.slug} value={c.slug}>{c.name} &ndash; {naira(c.prices[age])}</option>)}
+              </select>
+              <small>Only courses available for {ageLabel.toLowerCase()} are listed.</small>
+            </label>
+            <div className="rg-f">Class time
+              <div className="rg-slots">
+                {SCHEDULE.slots.map((s) => (
+                  <label key={s.id} className={`rg-slot${slot === s.id ? ' on' : ''}`}>
+                    <input type="radio" name="slot" value={s.id} checked={slot === s.id} onChange={() => setSlot(s.id)} required />
+                    <b>{s.label}</b>
+                    <span>{s.time} &middot; {SCHEDULE.days}</span>
+                  </label>
+                ))}
+              </div>
+              <small>{SCHEDULE.mode}.</small>
+            </div>
+          </section>
+
+          <section className="rg-step">
+            <h2 className="rg-step__t"><span>3</span>Your details</h2>
+            <div className="rg-grid">
+              <label className="rg-f">Full name<input required value={f.fullName} onChange={set('fullName')} autoComplete="name" placeholder="Student full name" /></label>
+              <label className="rg-f">Email address<input required type="email" value={f.email} onChange={set('email')} autoComplete="email" placeholder="name@email.com" /></label>
+              <label className="rg-f">Phone number (WhatsApp)<input required type="tel" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="e.g. 0801 234 5678" /></label>
+              {minor && <label className="rg-f">Date of birth<input required type="date" value={f.dob} onChange={set('dob')} max={new Date().toISOString().slice(0, 10)} /></label>}
+              <label className="rg-f rg-f--full">Residential address<input required value={f.address} onChange={set('address')} autoComplete="street-address" placeholder="House number, street, area" /></label>
+              <label className="rg-f">{minor ? 'Parent / guardian name' : 'Emergency contact name (optional)'}<input required={minor} value={f.guardianName} onChange={set('guardianName')} /></label>
+              <label className="rg-f">{minor ? 'Parent / guardian phone' : 'Emergency contact phone (optional)'}<input required={minor} type="tel" value={f.guardianPhone} onChange={set('guardianPhone')} /></label>
+              <label className="rg-f rg-f--full">Anything else we should know? (optional)<textarea value={f.notes} onChange={set('notes')} /></label>
+              <input className="rg-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" name="website" value={f.website} onChange={set('website')} />
+            </div>
+          </section>
+        </div>
+
+        <aside className="rg-sum">
+          <h3>Your registration</h3>
+          <dl>
+            <div><dt>Age group</dt><dd>{ageLabel}</dd></div>
+            <div><dt>Course</dt><dd>{course ? course.name : 'Not chosen yet'}</dd></div>
+            <div><dt>Duration</dt><dd>{course ? course.weeks : '-'}</dd></div>
+            <div><dt>Class time</dt><dd>{slotObj ? `${slotObj.label}, ${slotObj.time}` : 'Not chosen yet'}</dd></div>
+          </dl>
+          <div className="rg-sum__fee"><small>Training fee</small><strong>{fee ? naira(fee) : '-'}</strong></div>
+          {err && <p className="rg-err">{err}</p>}
+          <button type="submit" className="pg-btn pg-btn--blue" disabled={busy}>{busy ? 'Sending...' : 'Submit registration'}</button>
+          <p className="rg-sum__note">After you submit, you will see the bank details to complete your payment.</p>
+        </aside>
+      </form>
+    </PageShell>
+  )
+}

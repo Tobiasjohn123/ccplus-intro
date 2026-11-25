@@ -1,0 +1,45 @@
+import { Link } from 'react-router-dom'
+import { MapPin, Phone, Mail, ArrowUpRight } from 'lucide-react'
+import { CONTACT } from '../../data/config'
+import { COURSES } from '../../data/courses'
+
+const LINKS = [['Home', '/'], ['Courses', '/courses'], ['About', '/about'], ['Reviews', '/reviews'], ['Contact', '/contact'], ['Register', '/register']]
+
+export default function Footer() {
+  const top = COURSES.slice(0, 8)
+  return (
+    <footer className="fx-wrap">
+      <div className="fx">
+        <div className="fx__in">
+          <div className="fx__grid">
+            <div className="fx__brand">
+              <b className="fx__name">Computer College Plus</b>
+              <p>Empowering the next generation of tech professionals with cutting-edge education and hands-on experience.</p>
+              <Link className="fx__cta" to="/register">Register now <ArrowUpRight size={16} /></Link>
+            </div>
+
+            <nav className="fx__col" aria-label="Footer">
+              <h4>Explore</h4>
+              {LINKS.map(([t, to]) => <Link key={to} to={to}>{t}</Link>)}
+            </nav>
+
+            <div className="fx__col">
+              <h4>Courses</h4>
+              {top.map((c) => <Link key={c.slug} to={`/courses/${c.slug}`}>{c.name}</Link>)}
+              <Link to="/courses" className="fx__all">View all courses</Link>
+            </div>
+
+            <div className="fx__col">
+              <h4>Contact</h4>
+              <span><MapPin size={16} /> {CONTACT.address}</span>
+              <span><Phone size={16} /> {CONTACT.phone} / {CONTACT.phone2}</span>
+              <span><Mail size={16} /> {CONTACT.email}</span>
+            </div>
+          </div>
+
+          <div className="fx__copy">&copy; {new Date().getFullYear()} Computer College Plus. All rights reserved.</div>
+        </div>
+      </div>
+    </footer>
+  )
+}

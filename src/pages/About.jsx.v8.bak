@@ -1,0 +1,59 @@
+import { Link } from 'react-router-dom'
+import { Lightbulb, GraduationCap, Users, Award, ArrowRight } from 'lucide-react'
+import PageShell from '../components/Pages/PageShell'
+import CtaBanner from '../components/Sections/CtaBanner'
+import { STATS } from '../data/stats'
+
+const VALUES = [
+  [Lightbulb, 'Innovation', 'We stay at the forefront of technology, constantly updating our curriculum with the latest industry trends and tools.'],
+  [GraduationCap, 'Student Success', 'Your success is our priority. We provide personalized support and mentorship throughout your learning journey.'],
+  [Users, 'Community', "Join a vibrant community of learners, mentors, and industry professionals who support each other\u2019s growth."],
+  [Award, 'Excellence', 'We maintain the highest standards in education, ensuring our graduates are well-prepared for their careers.'],
+]
+
+export default function About() {
+  const stats = STATS.filter((s) => s.value && s.label)
+  return (
+    <PageShell
+      kicker="About us"
+      title={<>About <mark>Computer College Plus</mark></>}
+      sub="Empowering the next generation of tech professionals through innovative education and hands-on experience."
+    >
+      <section className="ab-sec ab-mission">
+        <h2>Our mission</h2>
+        <p>At Computer College Plus, we believe that everyone deserves access to high-quality tech education. Our mission is to bridge the digital divide by providing accessible, comprehensive training programmes for people of all ages, and to close the gap between traditional education and industry needs with practical, hands-on learning that prepares students for successful careers in technology.</p>
+        <p>{"Since our founding, we\u2019ve helped thousands of students, both in person and online, transform their careers and achieve their dreams in the tech industry. Our comprehensive curriculum, expert instructors, and supportive community create the perfect environment for learning and growth."}</p>
+        <Link className="pg-btn pg-btn--blue" to="/courses">Explore our courses <ArrowRight size={16} /></Link>
+      </section>
+
+      {stats.length > 0 && (
+        <section className="ab-sec">
+          <h2>Our impact</h2>
+          <div className="rv-stats">
+            {stats.map((s) => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}
+          </div>
+        </section>
+      )}
+
+      <section className="ab-sec">
+        <h2>Our values</h2>
+        <div className="ab-grid">
+          {VALUES.map(([Icon, t, d]) => (
+            <div key={t} className="ab-card">
+              <i><Icon size={24} /></i>
+              <b>{t}</b>
+              <p>{d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <CtaBanner
+        title="Ready to join our community?"
+        text="Take the first step towards transforming your career with Computer College Plus."
+        primary={{ label: 'Start learning today', to: '/courses' }}
+        secondary={{ label: 'Get in touch', to: '/contact' }}
+      />
+    </PageShell>
+  )
+}

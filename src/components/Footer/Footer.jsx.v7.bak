@@ -1,0 +1,34 @@
+import { Link } from 'react-router-dom'
+import { MapPin, Phone, Mail } from 'lucide-react'
+import { CONTACT } from '../../data/config'
+
+export default function Footer() {
+  return (
+    <footer className="ft">
+      <div className="ft__in">
+        <div className="ft__grid">
+          <div className="ft__brandcol">
+            <b className="ft__brand">Computer College Plus</b>
+            <p>Empowering the next generation of tech professionals with cutting-edge education and hands-on experience.</p>
+          </div>
+          <div className="ft__col">
+            <h4>Explore</h4>
+            <Link to="/">Home</Link>
+            <Link to="/courses">Courses</Link>
+            <Link to="/about">About</Link>
+            <Link to="/reviews">Reviews</Link>
+            <Link to="/contact">Contact</Link>
+            <Link to="/register">Register</Link>
+          </div>
+          <div className="ft__col">
+            <h4>Contact</h4>
+            <span><MapPin size={16} /> {CONTACT.address}</span>
+            <span><Phone size={16} /> {CONTACT.phone} / {CONTACT.phone2}</span>
+            <span><Mail size={16} /> {CONTACT.email}</span>
+          </div>
+        </div>
+        <div className="ft__copy">&copy; {new Date().getFullYear()} Computer College Plus. All rights reserved.</div>
+      </div>
+    </footer>
+  )
+}

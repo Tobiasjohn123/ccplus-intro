@@ -1,29 +1,70 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Courses from './pages/Courses'
+import CourseDetail from './pages/CourseDetail'
 import Register from './pages/Register'
+import About from './pages/About'
+import Reviews from './pages/Reviews'
 import Chat from './pages/Chat'
+import Footer from './components/Footer/Footer'
+import MobileNav from './components/Navbar/MobileNav'
+import useMotion from './useMotion'
+import './site.css'
+import './site2.css'
+import './site3.css'
+import './site4.css'
 
-function ScrollTop() {
+function Shell() {
   const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
-  return null
-}
+  const navigate = useNavigate()
+  useMotion()
 
-export default function App() {
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }) }, [pathname])
+
+  // Smooth exit: fade the page out, then go to the next one.
+  useEffect(() => {
+    const onClick = (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      const a = e.target.closest && e.target.closest('a[href]')
+      if (!a || a.target === '_blank' || a.hasAttribute('download')) return
+      const url = new URL(a.href, window.location.origin)
+      if (url.origin !== window.location.origin) return
+      const here = window.location.pathname + window.location.search
+      const to = url.pathname + url.search
+      if (to === here) return
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      e.preventDefault()
+      e.stopPropagation()
+      const main = document.querySelector('main')
+      if (main) main.classList.add('leaving')
+      setTimeout(() => navigate(to + url.hash), 240)
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [navigate])
+
   return (
-    <BrowserRouter>
-      <ScrollTop />
-      <main>
+    <>
+      <main key={pathname} className="page-fade">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:slug" element={<CourseDetail />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/contact" element={<Chat />} />
+          <Route path="/chat" element={<Navigate to="/contact" replace />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
-    </BrowserRouter>
+      <Footer />
+      <MobileNav />
+    </>
   )
+}
+
+export default function App() {
+  return <BrowserRouter><Shell /></BrowserRouter>
 }

@@ -1,0 +1,33 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+const SEL = '.sec-head, .sec-step, .sec-q, .sec-cta, .pg__head > *, .bt, .cd-sec, .cd-card, .rg-step, .rg-sum, .pg-contact, .sl, .ab-card, .ab-sec, .rv-stats'
+
+// Content below the fold eases in when it scrolls into view.
+export default function useMotion() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return
+        const el = e.target
+        io.unobserve(el)
+        el.classList.add('is-in')
+        setTimeout(() => el.classList.remove('reveal', 'is-in'), 1500)
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' })
+
+    const t = setTimeout(() => {
+      document.querySelectorAll(SEL).forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return
+        const sibs = Array.from(el.parentElement.children).filter((n) => n.matches(SEL))
+        el.style.setProperty('--rd', Math.min(sibs.indexOf(el), 6) * 70 + 'ms')
+        el.classList.add('reveal')
+        io.observe(el)
+      })
+    }, 60)
+
+    return () => { clearTimeout(t); io.disconnect() }
+  }, [pathname])
+}

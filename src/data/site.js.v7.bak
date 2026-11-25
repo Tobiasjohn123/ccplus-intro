@@ -1,0 +1,20 @@
+// All courses hold on weekends, online and interactive.
+export const SCHEDULE = {
+  days: 'Weekends',
+  mode: 'Online & interactive',
+  slots: [
+    { id: 'afternoon', label: 'Afternoon class', time: '2:00 pm' },
+    { id: 'evening', label: 'Evening class', time: '7:00 pm' },
+  ],
+}
+
+// Bank transfer details copied from the programmes flyer. Check them before going live.
+export const PAYMENT = {
+  accounts: [
+    { bank: 'Moniepoint MFB', number: '4000148329', name: 'COMPUTER COLLEGE PLUS' },
+    { bank: 'First Bank', number: '2046138396', name: 'COMPUTER COLLEGE PLUS' },
+  ],
+}
+
+// Paste the Google Apps Script web app URL here. Empty = registrations are NOT saved yet.
+export const SHEET_URL = ''

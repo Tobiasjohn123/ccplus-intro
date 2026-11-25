@@ -1,0 +1,79 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Play, CalendarDays } from 'lucide-react'
+import Navbar, { BrandLogo } from '../Navbar/Navbar'
+import VideoModal from './VideoModal'
+import SmartImg from './SmartImg'
+import { CONFIG, CONTACT } from '../../data/config'
+import { HERO } from '../../data/heroImages'
+import { SCHEDULE } from '../../data/site'
+import './Hero.css'
+
+const WA = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent('Hello, I would like to register for the next cohort.')}`
+const SLOTS = SCHEDULE.slots.map((s) => `${s.label.replace(' class', '')} ${s.time}`).join(' \u00b7 ')
+
+export default function Hero() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <section className={`hero${CONFIG.videoUrl ? ' has-video' : ''}`} id="top">
+      <i className="orb o1" /><i className="orb o3" />
+      <div className="hero__in">
+        <Navbar />
+
+        <div className="body">
+          <div className="left">
+            <span className="eyebrow rise" style={{ '--i': 1 }}><i className="dot" /> {CONFIG.cohort} now open</span>
+
+            <div className="copy">
+              <h1 className="rise" style={{ '--i': 2 }}>Learn the skill.<br /><mark>Start the career.</mark></h1>
+              <p className="rise" style={{ '--i': 3 }}>Hands-on online classes, recorded sessions, a professional certificate and internship opportunities.</p>
+              <div className="cta rise" style={{ '--i': 4 }}>
+                <a className="btn btn--dark" href={WA} target="_blank" rel="noreferrer">Register on WhatsApp <ArrowRight size={16} /></a>
+                <Link className="btn btn--line" to="/courses">See courses</Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="right rise" style={{ '--i': 2 }}>
+            <div className="vbox vbox--notch">
+              {CONFIG.videoUrl ? (
+                <iframe src={CONFIG.videoUrl} title="About Computer College Plus" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
+              ) : (
+                <>
+                  <button className="vbox__poster" onClick={() => setOpen(true)} aria-label="Play intro video">
+                    <SmartImg src={HERO} />
+                    <span className="vbox__btn"><Play size={38} fill="currentColor" /></span>
+                  </button>
+                  <span className="mlogo glass"><BrandLogo /></span>
+
+                  <div className="mintro">
+                    <div className="mh">Learn the skill.<br /><mark>Start the career.</mark></div>
+                    <p>Hands-on online classes, recorded sessions, a professional certificate and internship opportunities.</p>
+                    <div className="mcta">
+                      <a className="btn btn--white" href={WA} target="_blank" rel="noreferrer">Register now <ArrowRight size={16} /></a>
+                      <button type="button" className="btn btn--play" onClick={() => setOpen(true)}>
+                        <span className="pi"><Play size={15} fill="currentColor" /></span> Watch intro video
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="vnotch">
+              <i className="vnotch__ico"><CalendarDays size={22} /></i>
+              <span className="vnotch__txt">
+                <b>Weekend classes</b>
+                <small>{SLOTS}</small>
+                <small>{SCHEDULE.mode}</small>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <VideoModal open={open} onClose={() => setOpen(false)} url={CONFIG.videoUrl} />
+    </section>
+  )
+}

@@ -1,0 +1,18 @@
+export const SCHEDULE = {
+  days: 'Monday – Friday',
+  mode: 'Online & interactive',
+  slots: [
+    { id: 'morning', label: 'Morning class', time: '10:00 am' },
+    { id: 'afternoon', label: 'Afternoon class', time: '2:00 pm' },
+  ],
+}
+
+export const PAYMENT = {
+  accounts: [
+    { bank: 'Moniepoint MFB', number: '4000148329', name: 'COMPUTER COLLEGE PLUS' },
+    { bank: 'First Bank', number: '2046138396', name: 'COMPUTER COLLEGE PLUS'},
+  ],
+}
+
+// PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+export const SHEET_URL = '' 

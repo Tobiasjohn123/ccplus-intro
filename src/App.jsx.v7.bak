@@ -1,0 +1,40 @@
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import Home from './pages/Home'
+import Courses from './pages/Courses'
+import CourseDetail from './pages/CourseDetail'
+import Register from './pages/Register'
+import About from './pages/About'
+import Reviews from './pages/Reviews'
+import Chat from './pages/Chat'
+import Footer from './components/Footer/Footer'
+import useMotion from './useMotion'
+import './site.css'
+
+function Shell() {
+  const { pathname } = useLocation()
+  useMotion()
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }) }, [pathname])
+  return (
+    <>
+      <main key={pathname} className="page-fade">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:slug" element={<CourseDetail />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/contact" element={<Chat />} />
+          <Route path="/chat" element={<Navigate to="/contact" replace />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default function App() {
+  return <BrowserRouter><Shell /></BrowserRouter>
+}

@@ -1,0 +1,64 @@
+import { Link } from 'react-router-dom'
+import { Award, Briefcase, Video, Laptop, MapPin, Phone, Mail } from 'lucide-react'
+import PageShell from '../components/Pages/PageShell'
+import CtaBanner from '../components/Sections/CtaBanner'
+import { COURSES } from '../data/courses'
+import { CONTACT } from '../data/config'
+import { SCHEDULE, SCHEDULE_GROUPS, slotText } from '../data/site'
+
+// Replace this line with the client's own About text when you have it.
+const INTRO = 'Empowering the next generation of tech professionals with cutting-edge education and hands-on experience.'
+
+const PERKS = [
+  [Laptop, 'Hands-on online classes', 'Live, interactive classes you can join from anywhere.'],
+  [Video, 'Recorded sessions', 'Missed a class? Catch up with the recording.'],
+  [Award, 'Professional certificate', 'A certificate to show for your new skills.'],
+  [Briefcase, 'Internship opportunities', 'Practical experience to start your career.'],
+]
+
+export default function About() {
+  return (
+    <PageShell kicker="About us" title={<>Who we <mark>are</mark></>} sub={INTRO}>
+      <div className="ab-grid">
+        {PERKS.map(([Icon, t, d]) => (
+          <div key={t} className="ab-card">
+            <i><Icon size={24} /></i>
+            <b>{t}</b>
+            <p>{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <section className="ab-sec">
+        <h2>How classes run</h2>
+        <div className="ab-days">
+          {SCHEDULE_GROUPS.map((g) => (
+            <div key={g.days} className="ab-day">
+              <b>{g.days}</b>
+              <span>{g.slots.map(slotText).join(' or ')}</span>
+            </div>
+          ))}
+        </div>
+        <p className="ab-note">{SCHEDULE.mode}.</p>
+      </section>
+
+      <section className="ab-sec">
+        <h2>What you can learn</h2>
+        <div className="ab-chips">
+          {COURSES.map((c) => <Link key={c.slug} to={`/courses/${c.slug}`}>{c.name}</Link>)}
+        </div>
+      </section>
+
+      <section className="ab-sec">
+        <h2>Find us</h2>
+        <div className="ab-find">
+          <div><MapPin size={20} />{CONTACT.address}</div>
+          <div><Phone size={20} />{CONTACT.phone} / {CONTACT.phone2}</div>
+          <div><Mail size={20} />{CONTACT.email}</div>
+        </div>
+      </section>
+
+      <CtaBanner />
+    </PageShell>
+  )
+}

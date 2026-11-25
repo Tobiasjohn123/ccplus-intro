@@ -1,0 +1,90 @@
+import { useRef, useState } from 'react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import PageShell from '../components/Pages/PageShell'
+import CtaBanner from '../components/Sections/CtaBanner'
+import { TESTIMONIALS, GRADUATES } from '../data/reviews'
+import { STATS } from '../data/stats'
+
+function Slider({ items, label }) {
+  const ref = useRef(null)
+  const [i, setI] = useState(0)
+  const n = items.length
+  const go = (k) => {
+    const el = ref.current
+    if (!el) return
+    const t = (k + n) % n
+    el.scrollTo({ left: t * el.clientWidth, behavior: 'smooth' })
+  }
+  const onScroll = (e) => setI(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))
+  return (
+    <div className="sl" role="region" aria-roledescription="carousel" aria-label={label}>
+      <div className="sl__track" ref={ref} onScroll={onScroll}>
+        {items.map((c, k) => <div className="sl__slide" key={k}>{c}</div>)}
+      </div>
+      <div className="sl__nav">
+        <button type="button" className="sl__btn" onClick={() => go(i - 1)} aria-label="Previous"><ArrowLeft size={18} /></button>
+        <div className="sl__dots">
+          {items.map((_, k) => <button key={k} type="button" className={k === i ? 'on' : ''} onClick={() => go(k)} aria-label={`Go to slide ${k + 1}`} />)}
+        </div>
+        <button type="button" className="sl__btn" onClick={() => go(i + 1)} aria-label="Next"><ArrowRight size={18} /></button>
+      </div>
+    </div>
+  )
+}
+
+function Avatar({ src, name }) {
+  const [bad, setBad] = useState(false)
+  const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('')
+  return bad
+    ? <span className="st__av">{initials}</span>
+    : <img className="st__av" src={src} alt={name} loading="lazy" onError={() => setBad(true)} />
+}
+
+function Story({ t }) {
+  return (
+    <div className="st">
+      <Avatar src={t.img} name={t.name} />
+      <div>
+        <b className="st__name">{t.name}</b>
+        <span className="st__role">{t.role}</span>
+      </div>
+      <blockquote className="st__q">&ldquo;{t.quote}&rdquo;</blockquote>
+      <div className="st__stats">
+        {t.stats.map(([v, l]) => (
+          <div className="st__stat" key={l}><strong>{v}</strong><small>{l}</small></div>
+        ))}
+        <div className="st__stat"><span className="st__chip">{t.course}</span><small>Course Completed</small></div>
+      </div>
+    </div>
+  )
+}
+
+export default function Reviews() {
+  const stats = STATS.filter((s) => s.value && s.label)
+  return (
+    <PageShell kicker="Reviews" title={<>Student <mark>success stories</mark></>} sub="Hear from graduates who built real skills at Computer College Plus.">
+      {stats.length > 0 && (
+        <div className="rv-stats">
+          {stats.map((s) => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}
+        </div>
+      )}
+
+      <Slider label="Student success stories" items={TESTIMONIALS.map((t) => <Story key={t.name} t={t} />)} />
+
+      <h2 className="rv-h">Our graduates</h2>
+      <p className="rv-sub">Celebration boards from recent cohorts.</p>
+      <Slider
+        label="Graduate celebration boards"
+        items={GRADUATES.map((src, k) => (
+          <div className="gr-wrap" key={src}>
+            <div className="gr">
+              <img src={src} alt={`Graduates celebration board ${k + 1}`} loading="lazy" onError={(e) => { e.currentTarget.closest('.gr').style.display = 'none' }} />
+            </div>
+          </div>
+        ))}
+      />
+
+      <div className="rv-cta"><CtaBanner title="Ready to write your success story?" text="Pick a course and join the next cohort." /></div>
+    </PageShell>
+  )
+}

@@ -1,37 +1,21 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Play, Award, Video, Briefcase, Laptop } from 'lucide-react'
+import { ArrowRight, Play, Rocket } from 'lucide-react'
 import Navbar, { BrandLogo } from '../Navbar/Navbar'
 import VideoModal from './VideoModal'
 import SmartImg from './SmartImg'
 import { CONFIG, CONTACT } from '../../data/config'
-import { COURSES, naira } from '../../data/courses'
-import { HERO, TILES } from '../../data/heroImages'
+import { HERO } from '../../data/heroImages'
 import './Hero.css'
 
 const WA = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent('Hello, I would like to register for the next cohort.')}`
-const COURSES_URL = '/courses'
 
-const PERKS = [
-  [Laptop, 'Hands-on', 'Live online classes'],
-  [Video, 'Recordings', 'Catch up anytime'],
-  [Briefcase, 'Internship', 'In every course'],
-]
+// Edit these two lines to change the motivation card on the video image.
+const HOOK_TITLE = 'Your future starts here.'
+const HOOK_TEXT = 'One skill can change your career. Start building yours today.'
 
 export default function Hero() {
   const [open, setOpen] = useState(false)
-  const min = Math.min(...COURSES.map((c) => c.price))
-  const [a, b, c, d] = TILES
-
-  const tile = (x, i) => (
-    <Link key={x.k} className={`tile ${x.k} rise`} style={{ '--i': 5 + i }} to={COURSES_URL}>
-      <SmartImg src={x.img} />
-      <span className="tile__cap">
-        <span className="tile__txt"><b>{x.tag}</b><small>{x.sub}</small></span>
-        <i className="tile__go"><ArrowRight size={15} /></i>
-      </span>
-    </Link>
-  )
 
   return (
     <section className={`hero${CONFIG.videoUrl ? ' has-video' : ''}`} id="top">
@@ -48,22 +32,13 @@ export default function Hero() {
               <p className="rise" style={{ '--i': 3 }}>Hands-on online classes, recorded sessions, a professional certificate and internship opportunities.</p>
               <div className="cta rise" style={{ '--i': 4 }}>
                 <a className="btn btn--dark" href={WA} target="_blank" rel="noreferrer">Register on WhatsApp <ArrowRight size={16} /></a>
-                <Link className="btn btn--line" to={COURSES_URL}>See courses</Link>
+                <Link className="btn btn--line" to="/courses">See courses</Link>
               </div>
-            </div>
-
-            <div className="perks rise" style={{ '--i': 5 }}>
-              {PERKS.map(([Icon, t, s]) => (
-                <div key={t} className="perk glass">
-                  <i><Icon size={20} /></i>
-                  <span><b>{t}</b><small>{s}</small></span>
-                </div>
-              ))}
             </div>
           </div>
 
           <div className="right rise" style={{ '--i': 2 }}>
-            <div className="vbox">
+            <div className="vbox vbox--notch">
               {CONFIG.videoUrl ? (
                 <iframe src={CONFIG.videoUrl} title="About Computer College Plus" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
               ) : (
@@ -73,18 +48,6 @@ export default function Hero() {
                     <span className="vbox__btn"><Play size={38} fill="currentColor" /></span>
                   </button>
                   <span className="mlogo glass"><BrandLogo /></span>
-                  <span className="fc fc--tl glass"><i className="dot" /> Live online classes</span>
-                  <span className="fc fc--tr glass"><Award size={16} /> Certificate included</span>
-                  <div className="vbar">
-                    <span className="vbar__txt">
-                      <i className="vbar__ico"><Play size={14} fill="currentColor" /></i>
-                      <span><b>Watch the intro</b><small>See how our classes work</small></span>
-                    </span>
-                    <span className="vbar__items">
-                      <span><Video size={16} /> Recordings</span>
-                      <span><Briefcase size={16} /> Internship</span>
-                    </span>
-                  </div>
 
                   <div className="mintro">
                     <div className="mh">Learn the skill.<br /><mark>Start the career.</mark></div>
@@ -99,24 +62,15 @@ export default function Hero() {
                 </>
               )}
             </div>
-          </div>
 
-          {tile(a, 0)}
-          {tile(b, 1)}
-          <Link className="stat rise" style={{ '--i': 7 }} to={COURSES_URL}>
-            <span className="stat__top">
-              <strong>{COURSES.length}</strong>
-              <small>Courses available</small>
-            </span>
-            <span className="stat__bot">
-              <span className="stat__ico" aria-hidden="true">
-                <i><Award size={16} /></i><i><Video size={16} /></i><i><Briefcase size={16} /></i>
+            <div className="vnotch">
+              <i className="vnotch__ico"><Rocket size={24} /></i>
+              <span className="vnotch__txt">
+                <b>{HOOK_TITLE}</b>
+                <small>{HOOK_TEXT}</small>
               </span>
-              <span className="stat__from">From {naira(min)}</span>
-            </span>
-          </Link>
-          {tile(c, 3)}
-          {tile(d, 4)}
+            </div>
+          </div>
         </div>
       </div>
 
