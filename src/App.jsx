@@ -51,7 +51,8 @@ function Shell() {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/test-payment" element={<TestPayment />} />
+        <Route path="/register" element={<Register />} />
           <Route path="/about" element={<About />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/contact" element={<Chat />} />
